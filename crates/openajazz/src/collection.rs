@@ -4,10 +4,7 @@ use jazztastic::{
     keyboards::{DynKeyboard, Keyboard, ak820::Ak820},
     reports::rgb::Rgb,
 };
-use notify::{
-    EventKind, RecursiveMode, Watcher,
-    event::{DataChange, ModifyKind},
-};
+use notify::RecursiveMode;
 use notify_debouncer_full::new_debouncer;
 use std::{collections::HashMap, path::Path, sync::mpsc, time::Duration};
 
