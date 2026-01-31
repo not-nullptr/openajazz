@@ -11,16 +11,26 @@ pub use builder::RgbBuilder;
 pub use color::Color;
 pub use direction::Direction;
 pub use effect::Effect;
+use serde::{Deserialize, Serialize};
 pub use speed::Speed;
 
 use crate::into_report::IntoReport;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Rgb {
+    #[serde(default)]
     pub color: Color,
+
+    #[serde(default)]
     pub effect: Effect,
+
+    #[serde(default)]
     pub speed: Speed,
+
+    #[serde(default)]
     pub brightness: Brightness,
+
+    #[serde(default)]
     pub direction: Direction,
 }
 
