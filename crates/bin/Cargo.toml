@@ -1,0 +1,13 @@
+[package]
+name = "bin"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ajazz = { path = "../ajazz" }
+color-eyre = "0.6.5"
+env_logger = "0.11.8"
+iced = { version = "0.14.0", features = ["tokio"] }
+log = "0.4.29"
+thiserror = "2.0.18"
+tokio = { version = "1.49.0", features = ["sync", "rt-multi-thread", "macros"] }
