@@ -1,0 +1,20 @@
+# the "keyboards" table uses keyboard id for the keys.
+# to find your keyboard's id, run `openajazz` and take
+# note of the id shown in the logs.
+#
+# all fields are optional.
+[keyboards.18382622820373561603]
+# either a hexadecimal color or "rainbow", default is "#ffffff"
+color = "#7f44ff"
+
+# one of: "corrugated", "cloud", "serpentine", "spectrum", "breath", "normal", "reaction", "ripples", "traverse", "stars", "flowers", "roll", "wave", "cartoon", "rain", "scan", "surmount", "speed" (default: "normal")
+effect = "cloud"
+
+# one of: "fastest", "fast", "medium", "slow", "slowest" (default: "medium")
+speed = "fast"
+
+# one of: "highest", "high", "medium", "low", "lowest" (default: "highest")
+brightness = "high"
+
+# one of: "left_to_right", "right_to_left" (default: "left_to_right")
+direction = "right_to_left"
