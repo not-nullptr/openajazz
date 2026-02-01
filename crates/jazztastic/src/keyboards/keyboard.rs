@@ -6,6 +6,9 @@ pub trait Keyboard: Sized {
     const PRODUCT_ID: u16;
     const USAGE_PAGE: u16;
 
+	const MANUFACTURER: &str;
+	const NAME: &str;
+
     fn new(device: HidDevice) -> Self;
     fn device(&self) -> &HidDevice;
 
@@ -52,11 +55,22 @@ pub trait DynKeyboard {
         self.device_dyn().write(&buf)?;
 
         Ok(())
-    }
+	}
+
+	fn name_dyn(&self) -> &'static str;
+	fn manufacturer_dyn(&self) -> &'static str;
 }
 
 impl<K: Keyboard> DynKeyboard for K {
     fn device_dyn(&self) -> &HidDevice {
         self.device()
     }
+
+	fn name_dyn(&self) -> &'static str {
+		K::NAME
+	}
+
+	fn manufacturer_dyn(&self) -> &'static str {
+		K::MANUFACTURER
+	}
 }

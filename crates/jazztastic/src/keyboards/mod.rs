@@ -1,4 +1,5 @@
 pub mod ak820;
-mod keyboard;
+pub mod ak35i;
 
+mod keyboard;
 pub use keyboard::*;

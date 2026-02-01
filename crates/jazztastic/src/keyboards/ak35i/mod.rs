@@ -2,17 +2,17 @@ use crate::{keyboards::Keyboard, reports::rgb::Rgb};
 use hidapi::{HidDevice, HidError};
 
 #[derive(Debug)]
-pub struct Ak820 {
+pub struct Ak35i {
     device: HidDevice,
 }
 
-impl Keyboard for Ak820 {
-    const VENDOR_ID: u16 = 0x320F;
-    const PRODUCT_ID: u16 = 0x505B;
+impl Keyboard for Ak35i {
+    const VENDOR_ID: u16 = 0x0c45;
+    const PRODUCT_ID: u16 = 0x8009;
     const USAGE_PAGE: u16 = 0xFF1C;
 
 	const MANUFACTURER: &str = "AJAZZ";
-	const NAME: &str = "AK820";
+	const NAME: &str = "AK35I";
 
     fn new(device: HidDevice) -> Self {
         Self { device }
@@ -23,7 +23,7 @@ impl Keyboard for Ak820 {
     }
 }
 
-impl Ak820 {
+impl Ak35i {
     pub fn set_rgb(&self, rgb: &Rgb) -> Result<(), HidError> {
         self.send(rgb)
     }
