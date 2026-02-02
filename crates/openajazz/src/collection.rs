@@ -1,7 +1,7 @@
 use crate::{config::Config, id::KeyboardId};
 use jazztastic::{
     hidapi::HidApi,
-    keyboards::{DynKeyboard, Keyboard, ak820::Ak820},
+    keyboards::{DynKeyboard, Keyboard, ak35i::Ak35i, ak820::Ak820},
     reports::rgb::Rgb,
 };
 use notify::RecursiveMode;
@@ -82,22 +82,39 @@ impl KeyboardTask {
                 continue;
             }
 
-            let Some(keyboard) = (match (
-                device_info.vendor_id(),
-                device_info.product_id(),
-                device_info.usage_page(),
-            ) {
-                (Ak820::VENDOR_ID, Ak820::PRODUCT_ID, Ak820::USAGE_PAGE) => {
-                    let device = device_info.open_device(&self.api)?;
-                    Some(Box::new(Ak820::new(device)) as Box<dyn DynKeyboard + Send>)
-                }
-                _ => None,
-            }) else {
+			macro_rules! match_keyboards {
+				(
+					$device_info:expr,
+					$( $kbd_type:ty ),* $(,)?
+				) => {
+					(match (
+						$device_info.vendor_id(),
+						$device_info.product_id(),
+						$device_info.usage_page(),
+					) {
+						$(
+							(<$kbd_type>::VENDOR_ID, <$kbd_type>::PRODUCT_ID, <$kbd_type>::USAGE_PAGE) => {
+								let device = $device_info.open_device(&self.api)?;
+								Some(Box::new(<$kbd_type>::new(device)) as Box<dyn DynKeyboard + Send>)
+							}
+						)*
+						_ => None,
+					})
+				};
+			}
+
+            let Some(keyboard) = match_keyboards![
+				device_info,
+				Ak820,
+				Ak35i,
+			] else {
                 continue;
             };
 
             log::info!(
-                "new keyboard connected: {} (id: {id:?})",
+                "new keyboard connected: {} {} ('{}', id: {id})",
+				keyboard.manufacturer_dyn(),
+				keyboard.name_dyn(),
                 device_info.product_string().unwrap_or("Unknown Keyboard"),
             );
 

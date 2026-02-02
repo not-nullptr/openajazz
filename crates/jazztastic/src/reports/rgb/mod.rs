@@ -6,15 +6,18 @@ mod effect;
 mod flags;
 mod speed;
 
+use std::time::Duration;
+
 pub use brightness::Brightness;
 pub use builder::RgbBuilder;
 pub use color::Color;
 pub use direction::Direction;
 pub use effect::Effect;
+use hex_literal::hex;
 use serde::{Deserialize, Serialize};
 pub use speed::Speed;
 
-use crate::into_report::IntoReport;
+use crate::{into_report::{Bytes, Instruction, IntoReport, OneOrMany}, keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820}};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Rgb {
@@ -41,26 +44,88 @@ impl Rgb {
 }
 
 impl IntoReport for Rgb {
-    fn write_into(&self, buf: &mut [u8; 63]) {
-        buf[0] = 0x28;
-        buf[1] = 0x03;
-        buf[2] = 0x06;
-        buf[3] = 0x1d;
+    fn report(&self, keyboard_kind: KeyboardKind) -> OneOrMany<Instruction> {
+		let mut buf = [0u8; 65];
 
-        buf[8] = self.effect as u8;
-        buf[9] = self.brightness as u8;
-        buf[10] = self.speed as u8;
-        buf[11] = self.direction as u8;
+		self.color.write_to_keyboard_format(keyboard_kind, &mut buf);
+		self.effect.write_to_keyboard_format(keyboard_kind, &mut buf);
+		self.brightness.write_to_keyboard_format(keyboard_kind, &mut buf);
+		self.speed.write_to_keyboard_format(keyboard_kind, &mut buf);
+		self.direction.write_to_keyboard_format(keyboard_kind, &mut buf);
 
-        match self.color {
-            Color::Rgb(r, g, b) => {
-                buf[13] = r;
-                buf[14] = g;
-                buf[15] = b;
-            }
-            Color::Rainbow => {
-                buf[12] = 0x01;
-            }
-        }
+        match keyboard_kind {
+			k if k == Ak820::keyboard_kind() => {
+				let mut buf = [0u8; 65];
+				// buf[0] = 0x04;
+				// buf[1] = 0x28;
+        		// buf[2] = 0x03;
+        		// buf[3] = 0x06;
+        		// buf[4] = 0x1d;
+
+        		// buf[9] = self.effect as u8;
+        		// buf[10] = self.brightness as u8;
+        		// buf[11] = self.speed as u8;
+        		// buf[12] = self.direction as u8;
+
+        		// match self.color {
+        		//     Color::Rgb(r, g, b) => {
+        		//         buf[14] = r;
+        		//         buf[15] = g;
+        		//         buf[16] = b;
+        		//     }
+        		//     Color::Rainbow => {
+        		//         buf[13] = 0x01;
+        		//     }
+        		// }
+
+
+				OneOrMany::One(Instruction::Write(buf))
+			}
+
+			k if k == Ak35i::keyboard_kind() => {
+				const DELAY: Duration = Duration::from_millis(5);
+
+				// 00 01 FF 00 00 00 00 00 00 00 04 03 00 00 00 AA 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+				// buf[1] = 1;
+				// match self.color {
+				//     Color::Rgb(r, g, b) => {
+				//         buf[2] = r;
+				// 		buf[3] = g;
+				// 		buf[4] = b;
+				//     }
+				//     Color::Rainbow => {
+				//         unimplemented!();
+				//     }
+				// }
+
+				// buf[10] = 0x04;
+				// buf[11] = 0x03; 
+
+				buf[15] = 0xAA;
+				buf[16] = 0x55;
+
+				OneOrMany::Many(vec![
+					Instruction::Write(hex!("00 04 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00")),
+					Instruction::Delay(DELAY),
+					Instruction::Read(Bytes::SixtyFive),
+					Instruction::Delay(DELAY),
+					Instruction::Write(hex!("00 04 18 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00")),
+					Instruction::Delay(DELAY),
+					Instruction::Read(Bytes::SixtyFive),
+					Instruction::Delay(DELAY),
+					Instruction::Write(hex!("00 04 13 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00")),
+					Instruction::Delay(DELAY),
+					Instruction::Write(buf)
+				])
+			}
+ 
+			_ => {
+				panic!("unknown keyboard kind for RGB report");
+			}
+		}
     }
+}
+
+pub trait ToKeyboardFormat {
+	fn write_to_keyboard_format(&self, keyboard_kind: KeyboardKind, buf: &mut [u8]);
 }

@@ -6,28 +6,28 @@ use std::collections::HashMap;
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub keyboards: HashMap<KeyboardId, Rgb>,
-	#[serde(default)]
-	pub debug: DebugConfig,
+    #[serde(default)]
+    pub debug: DebugConfig,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct DebugConfig {
-	#[serde(default = "default_log_level")]
-	pub log_level: String,
+    #[serde(default = "default_log_level")]
+    pub log_level: String,
 
-	#[serde(default)]
-	pub log_usb_devices: bool,
+    #[serde(default)]
+    pub log_usb_devices: bool,
 }
 
 impl Default for DebugConfig {
-	fn default() -> Self {
-		Self {
-			log_level: default_log_level(),
-			log_usb_devices: false,
-		}
-	}
+    fn default() -> Self {
+        Self {
+            log_level: default_log_level(),
+            log_usb_devices: false,
+        }
+    }
 }
 
 fn default_log_level() -> String {
-	"openajazz=debug,jazztastic=debug".to_string()
+    "openajazz=debug,jazztastic=debug".to_string()
 }

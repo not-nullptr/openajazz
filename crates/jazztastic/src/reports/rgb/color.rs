@@ -55,3 +55,39 @@ impl Default for Color {
         Color::Rgb(255, 255, 255)
     }
 }
+
+use crate::{keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820}, reports::rgb::ToKeyboardFormat};
+ 
+impl ToKeyboardFormat for Color {
+	fn write_to_keyboard_format(&self, keyboard_kind: KeyboardKind, buf: &mut [u8]) {
+		match keyboard_kind {
+			k if k == Ak820::keyboard_kind() => {
+				match self {
+				    Color::Rgb(r, g, b) => {
+				        buf[14] = *r;
+				        buf[15] = *g;
+				        buf[16] = *b;
+				    }
+				    Color::Rainbow => {
+				        buf[13] = 0x01;
+				    }
+				}
+			}
+
+			k if k == Ak35i::keyboard_kind() => {
+				match self {
+				    Color::Rgb(r, g, b) => {
+				        buf[2] = *r;
+				        buf[3] = *g;
+				        buf[4] = *b;
+				    }
+				    Color::Rainbow => {
+				        unimplemented!("rainbow color not supported for Ak35i");
+				    }
+				}
+			}
+
+			_ => unimplemented!("unsupported keyboard kind for brightness"),
+		}
+	}
+}

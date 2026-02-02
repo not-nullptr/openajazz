@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use jazztastic::hidapi::DeviceInfo;
 use serde::Deserialize;
 
@@ -12,4 +14,10 @@ impl KeyboardId {
         let release_number = device_info.release_number() as u64;
         KeyboardId((usage_page << 48) | (vendor_id << 32) | (product_id << 16) | release_number)
     }
+}
+
+impl Display for KeyboardId {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		Display::fmt(&self.0, f)
+	}
 }

@@ -11,8 +11,8 @@ impl Keyboard for Ak820 {
     const PRODUCT_ID: u16 = 0x505B;
     const USAGE_PAGE: u16 = 0xFF1C;
 
-	const MANUFACTURER: &str = "AJAZZ";
-	const NAME: &str = "AK820";
+    const MANUFACTURER: &str = "AJAZZ";
+    const NAME: &str = "AK820";
 
     fn new(device: HidDevice) -> Self {
         Self { device }
@@ -24,7 +24,7 @@ impl Keyboard for Ak820 {
 }
 
 impl Ak820 {
-    pub fn set_rgb(&self, rgb: &Rgb) -> Result<(), HidError> {
+    pub fn set_rgb(&mut self, rgb: &Rgb) -> Result<(), HidError> {
         self.send(rgb)
     }
 }
