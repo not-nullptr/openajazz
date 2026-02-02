@@ -1,7 +1,4 @@
-use std::time::Duration;
-
-use crate::{keyboards::Keyboard, reports::rgb::Rgb};
-use hex_literal::hex;
+use crate::keyboards::Keyboard;
 use hidapi::{HidDevice, HidError};
 
 #[derive(Debug)]

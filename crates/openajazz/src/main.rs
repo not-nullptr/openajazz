@@ -1,8 +1,5 @@
 use crate::{collection::KeyboardTask, config::Config};
-use jazztastic::{
-    hidapi::HidApi,
-    keyboards::{Keyboard, ak35i::Ak35i},
-};
+use jazztastic::hidapi::HidApi;
 
 mod collection;
 mod config;
@@ -10,19 +7,24 @@ mod id;
 
 fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
-    env_logger::init_from_env(
-        env_logger::Env::default().default_filter_or("bin=debug,openajazz=debug,jazztastic=debug"),
-    );
 
     let config = match std::fs::read_to_string("config.toml") {
         Ok(cfg) => cfg,
         Err(e) => {
+            env_logger::init_from_env(
+                env_logger::Env::default().default_filter_or(config::default_log_level()),
+            );
+
             log::error!("failed to read config.toml: {e}");
             return Ok(());
         }
     };
 
     let config: Config = toml::from_str(&config)?;
+
+    env_logger::init_from_env(
+        env_logger::Env::default().default_filter_or(&config.debug.log_level),
+    );
 
     let api = HidApi::new()?;
 

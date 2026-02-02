@@ -28,6 +28,6 @@ impl Default for DebugConfig {
     }
 }
 
-fn default_log_level() -> String {
+pub fn default_log_level() -> String {
     "openajazz=debug,jazztastic=debug".to_string()
 }

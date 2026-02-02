@@ -60,51 +60,9 @@ impl IntoReport for Rgb {
             .write_to_keyboard_format(keyboard_kind, &mut buf);
 
         match keyboard_kind {
-            k if k == Ak820::keyboard_kind() => {
-                let mut buf = [0u8; 65];
-                // buf[0] = 0x04;
-                // buf[1] = 0x28;
-                // buf[2] = 0x03;
-                // buf[3] = 0x06;
-                // buf[4] = 0x1d;
-
-                // buf[9] = self.effect as u8;
-                // buf[10] = self.brightness as u8;
-                // buf[11] = self.speed as u8;
-                // buf[12] = self.direction as u8;
-
-                // match self.color {
-                //     Color::Rgb(r, g, b) => {
-                //         buf[14] = r;
-                //         buf[15] = g;
-                //         buf[16] = b;
-                //     }
-                //     Color::Rainbow => {
-                //         buf[13] = 0x01;
-                //     }
-                // }
-
-                OneOrMany::One(Instruction::Write(buf))
-            }
-
+            k if k == Ak820::keyboard_kind() => OneOrMany::One(Instruction::Write(buf)),
             k if k == Ak35i::keyboard_kind() => {
                 const DELAY: Duration = Duration::from_millis(5);
-
-                // 00 01 FF 00 00 00 00 00 00 00 04 03 00 00 00 AA 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-                // buf[1] = 1;
-                // match self.color {
-                //     Color::Rgb(r, g, b) => {
-                //         buf[2] = r;
-                // 		buf[3] = g;
-                // 		buf[4] = b;
-                //     }
-                //     Color::Rainbow => {
-                //         unimplemented!();
-                //     }
-                // }
-
-                // buf[10] = 0x04;
-                // buf[11] = 0x03;
 
                 buf[15] = 0xAA;
                 buf[16] = 0x55;
