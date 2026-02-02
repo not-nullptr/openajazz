@@ -37,6 +37,8 @@ pub trait Keyboard: Sized + 'static {
     fn send<R: IntoReport>(&mut self, message: &R) -> Result<(), HidError> {
         let buf = message.report(Self::keyboard_kind());
 
+        log::debug!("sending report to {}: {:?}", Self::NAME, buf);
+
         match buf {
             OneOrMany::One(instruction) => instruction.execute(self),
 

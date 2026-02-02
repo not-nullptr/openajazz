@@ -60,7 +60,17 @@ impl IntoReport for Rgb {
             .write_to_keyboard_format(keyboard_kind, &mut buf);
 
         match keyboard_kind {
-            k if k == Ak820::keyboard_kind() => OneOrMany::One(Instruction::Write(buf)),
+            k if k == Ak820::keyboard_kind() => {
+                buf[0] = 0x04;
+
+                buf[1] = 0x2A;
+                buf[2] = 0x3D;
+                buf[3] = 0x06;
+                buf[4] = 0x1d;
+
+                OneOrMany::One(Instruction::Write(buf))
+            }
+
             k if k == Ak35i::keyboard_kind() => {
                 const DELAY: Duration = Duration::from_millis(5);
 
