@@ -15,3 +15,4 @@ check [config.example.toml](config.example.toml). tl;dr there is a `keyboards` m
 ## support
 
 - AJAZZ AK820
+- AJAZZ AK35i (RGB only)
