@@ -7,8 +7,8 @@
 # either a hexadecimal color or "rainbow", default is "#ffffff"
 color = "#7f44ff"
 
-# one of: "corrugated", "cloud", "serpentine", "spectrum", "breath", "normal", "reaction", "ripples", "traverse", "stars", "flowers", "roll", "wave", "cartoon", "rain", "scan", "surmount", "speed" (default: "normal")
-effect = "cloud"
+# defaults to static. see crates/jazztastic/src/reports/rgb/effect.rs for a list of supported values for your keyboard
+effect = "static"
 
 # one of: "fastest", "fast", "medium", "slow", "slowest" (default: "medium")
 speed = "fast"
