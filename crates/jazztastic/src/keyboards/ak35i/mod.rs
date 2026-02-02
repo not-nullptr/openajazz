@@ -25,12 +25,11 @@ impl Keyboard for Ak35i {
         &self.device
     }
 
-	fn read(&mut self, buf: &mut [u8]) -> Result<usize, HidError> {
-		self.device.get_feature_report(buf)
-	}
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize, HidError> {
+        self.device.get_feature_report(buf)
+    }
 
-	fn write(&mut self, buf: &[u8]) -> Result<usize, HidError> {
-		self.device.send_feature_report(buf)
-			.map(|_| buf.len())
-	}
+    fn write(&mut self, buf: &[u8]) -> Result<usize, HidError> {
+        self.device.send_feature_report(buf).map(|_| buf.len())
+    }
 }

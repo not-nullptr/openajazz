@@ -82,7 +82,7 @@ impl KeyboardTask {
                 continue;
             }
 
-			macro_rules! match_keyboards {
+            macro_rules! match_keyboards {
 				(
 					$device_info:expr,
 					$( $kbd_type:ty ),* $(,)?
@@ -103,18 +103,14 @@ impl KeyboardTask {
 				};
 			}
 
-            let Some(keyboard) = match_keyboards![
-				device_info,
-				Ak820,
-				Ak35i,
-			] else {
+            let Some(keyboard) = match_keyboards![device_info, Ak820, Ak35i,] else {
                 continue;
             };
 
             log::info!(
                 "new keyboard connected: {} {} ('{}', id: {id})",
-				keyboard.manufacturer_dyn(),
-				keyboard.name_dyn(),
+                keyboard.manufacturer_dyn(),
+                keyboard.name_dyn(),
                 device_info.product_string().unwrap_or("Unknown Keyboard"),
             );
 

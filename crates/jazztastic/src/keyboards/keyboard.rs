@@ -1,6 +1,9 @@
-use std::any::TypeId;
-use crate::{error::DetectError, into_report::{IntoReport, OneOrMany}};
+use crate::{
+    error::DetectError,
+    into_report::{IntoReport, OneOrMany},
+};
 use hidapi::{HidApi, HidDevice, HidError};
+use std::any::TypeId;
 
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -34,36 +37,34 @@ pub trait Keyboard: Sized + 'static {
     fn send<R: IntoReport>(&mut self, message: &R) -> Result<(), HidError> {
         let buf = message.report(Self::keyboard_kind());
 
-		match buf {
-			OneOrMany::One(instruction) => {
-				instruction.execute(self)
-			}
+        match buf {
+            OneOrMany::One(instruction) => instruction.execute(self),
 
-			OneOrMany::Many(instructions) => {
-				for instruction in instructions {
-					instruction.execute(self)?;
-				}
+            OneOrMany::Many(instructions) => {
+                for instruction in instructions {
+                    instruction.execute(self)?;
+                }
 
-				Ok(())
-			}
-		}
+                Ok(())
+            }
+        }
     }
 
-	fn read(&mut self, buf: &mut [u8]) -> Result<usize, HidError> {
-		self.device().read(buf)
-	}
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize, HidError> {
+        self.device().read(buf)
+    }
 
-	fn write(&mut self, buf: &[u8]) -> Result<usize, HidError> {
-		self.device().write(buf)
-	}
+    fn write(&mut self, buf: &[u8]) -> Result<usize, HidError> {
+        self.device().write(buf)
+    }
 
     fn as_dyn(&self) -> &dyn DynKeyboard {
         self
     }
 
-	fn keyboard_kind() -> KeyboardKind {
-		KeyboardKind(TypeId::of::<Self>())
-	}
+    fn keyboard_kind() -> KeyboardKind {
+        KeyboardKind(TypeId::of::<Self>())
+    }
 }
 
 pub trait DynKeyboard {
@@ -85,7 +86,7 @@ pub trait DynKeyboard {
     fn name_dyn(&self) -> &'static str;
     fn manufacturer_dyn(&self) -> &'static str;
 
-	fn keyboard_kind_dyn(&self) -> KeyboardKind;
+    fn keyboard_kind_dyn(&self) -> KeyboardKind;
 }
 
 impl<K: Keyboard> DynKeyboard for K {
@@ -105,7 +106,7 @@ impl<K: Keyboard> DynKeyboard for K {
         K::MANUFACTURER
     }
 
-	fn keyboard_kind_dyn(&self) -> KeyboardKind {
-		K::keyboard_kind()
-	}
+    fn keyboard_kind_dyn(&self) -> KeyboardKind {
+        K::keyboard_kind()
+    }
 }

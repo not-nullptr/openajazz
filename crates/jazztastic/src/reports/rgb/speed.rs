@@ -12,19 +12,22 @@ pub enum Speed {
     Slowest,
 }
 
-use crate::{keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820}, reports::rgb::ToKeyboardFormat};
+use crate::{
+    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820},
+    reports::rgb::ToKeyboardFormat,
+};
 impl ToKeyboardFormat for Speed {
-	fn write_to_keyboard_format(&self, keyboard_kind: KeyboardKind, buf: &mut [u8]) {
-		match keyboard_kind {
-			k if k == Ak820::keyboard_kind() => {
-				buf[11] = *self as u8;
-			}
-			
-			k if k == Ak35i::keyboard_kind() => {
-				buf[11] = 4 - (*self as u8);
-			}
+    fn write_to_keyboard_format(&self, keyboard_kind: KeyboardKind, buf: &mut [u8]) {
+        match keyboard_kind {
+            k if k == Ak820::keyboard_kind() => {
+                buf[11] = *self as u8;
+            }
 
-			_ => unimplemented!("unsupported keyboard kind for speed"),
-		}
-	}
+            k if k == Ak35i::keyboard_kind() => {
+                buf[11] = 4 - (*self as u8);
+            }
+
+            _ => unimplemented!("unsupported keyboard kind for speed"),
+        }
+    }
 }
