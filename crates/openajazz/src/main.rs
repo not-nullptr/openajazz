@@ -1,5 +1,5 @@
 use crate::{collection::KeyboardTask, config::Config};
-use jazztastic::hidapi::HidApi;
+use jazztastic::{ hidapi::HidApi};
 
 mod collection;
 mod config;

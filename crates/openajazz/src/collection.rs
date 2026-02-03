@@ -1,15 +1,16 @@
 use crate::{config::Config, id::KeyboardId};
+use chrono::{Local};
 use jazztastic::{
     hidapi::HidApi,
-    keyboards::{DynKeyboard, Keyboard, ak35i::Ak35i, ak820::Ak820, f75_max::F75Max},
-    reports::rgb::Rgb,
+    keyboards::{DynKeyboard, Keyboard, KeyboardFeatures, ak35i::Ak35i, ak820::Ak820, f75_max::F75Max},
+    reports::{rgb::Rgb, time::TimeSync},
 };
 use notify::RecursiveMode;
 use notify_debouncer_full::new_debouncer;
 use std::{collections::HashMap, path::Path, sync::mpsc, time::Duration};
 
 struct KeyboardEntry {
-    usb: Box<dyn DynKeyboard + Send>,
+    device: Box<dyn DynKeyboard + Send>,
     current_config: Option<Rgb>,
 }
 
@@ -104,26 +105,33 @@ impl KeyboardTask {
 			}
 
             #[rustfmt::skip]
-            let Some(keyboard) = match_keyboards![
+            let Some(mut keyboard) = match_keyboards![
                 device_info, 
                 Ak820, 
                 Ak35i, 
                 F75Max
-              ] else {
+            ] else {
                 continue;
             };
 
             log::info!(
                 "new keyboard connected: {} {} ('{}', id: {id})",
-                keyboard.manufacturer_dyn(),
-                keyboard.name_dyn(),
+                keyboard.manufacturer(),
+                keyboard.name(),
                 device_info.product_string().unwrap_or("Unknown Keyboard"),
             );
+
+            if keyboard.features().contains(KeyboardFeatures::TIME_SYNC) {
+                keyboard.send_dyn(&TimeSync {
+                    date_time: Local::now(),
+                })?;
+                log::info!("synced time with keyboard!");
+            }
 
             self.keyboards.insert(
                 id,
                 KeyboardEntry {
-                    usb: keyboard,
+                    device: keyboard,
                     current_config: None,
                 },
             );
@@ -144,7 +152,7 @@ impl KeyboardTask {
     }
 
     fn update_rgb(&mut self) -> color_eyre::Result<()> {
-        for (id, keyboard) in &mut self.keyboards {
+        for (id, keyboard) in self.keyboards.iter_mut().filter(|(_, k)| k.device.features().contains(KeyboardFeatures::RGB)) {
             if let Some(rgb) = self.config.keyboards.get(id) {
                 if keyboard.current_config.as_ref() == Some(rgb) {
                     continue;
@@ -152,7 +160,7 @@ impl KeyboardTask {
 
                 keyboard.current_config = Some(*rgb);
 
-                keyboard.usb.send_dyn(rgb)?;
+                keyboard.device.send_dyn(rgb)?;
             }
         }
 
