@@ -57,7 +57,7 @@ impl Default for Color {
 }
 
 use crate::{
-    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820},
+    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820, f75_max::F75Max},
     reports::rgb::ToKeyboardFormat,
 };
 
@@ -75,7 +75,7 @@ impl ToKeyboardFormat for Color {
                 }
             },
 
-            k if k == Ak35i::keyboard_kind() => match self {
+            k if k == Ak35i::keyboard_kind() || k == F75Max::keyboard_kind() => match self {
                 Color::Rgb(r, g, b) => {
                     buf[2] = *r;
                     buf[3] = *g;

@@ -47,7 +47,7 @@ pub enum Effect {
 }
 
 use crate::{
-    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820},
+    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820, f75_max::F75Max},
     reports::rgb::ToKeyboardFormat,
 };
 
@@ -63,7 +63,7 @@ impl ToKeyboardFormat for Effect {
                 buf[9] = effect_u8;
             }
 
-            k if k == Ak35i::keyboard_kind() => {
+            k if k == Ak35i::keyboard_kind() || k == F75Max::keyboard_kind() => {
                 buf[1] = effect_u8;
             }
 
@@ -97,7 +97,7 @@ impl Effect {
                 _ => None,
             },
 
-            k if k == Ak35i::keyboard_kind() => match self {
+            k if k == Ak35i::keyboard_kind() || k == F75Max::keyboard_kind() => match self {
                 Effect::Static => Some(1),
                 Effect::Glittering => Some(4),
                 Effect::Falling => Some(5),

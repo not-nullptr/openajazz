@@ -16,3 +16,4 @@ check [config.example.toml](config.example.toml). tl;dr there is a `keyboards` m
 
 - AJAZZ AK820
 - AJAZZ AK35i (RGB only)
+- AULA F75 Max (RGB only)

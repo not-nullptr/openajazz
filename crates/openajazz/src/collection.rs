@@ -1,7 +1,7 @@
 use crate::{config::Config, id::KeyboardId};
 use jazztastic::{
     hidapi::HidApi,
-    keyboards::{DynKeyboard, Keyboard, ak35i::Ak35i, ak820::Ak820},
+    keyboards::{DynKeyboard, Keyboard, ak35i::Ak35i, ak820::Ak820, f75_max::F75Max},
     reports::rgb::Rgb,
 };
 use notify::RecursiveMode;
@@ -103,7 +103,13 @@ impl KeyboardTask {
 				};
 			}
 
-            let Some(keyboard) = match_keyboards![device_info, Ak820, Ak35i,] else {
+            #[rustfmt::skip]
+            let Some(keyboard) = match_keyboards![
+                device_info, 
+                Ak820, 
+                Ak35i, 
+                F75Max
+              ] else {
                 continue;
             };
 
