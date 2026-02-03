@@ -6,20 +6,23 @@ mod effect;
 mod flags;
 mod speed;
 
-use std::time::Duration;
-
 pub use brightness::Brightness;
 pub use builder::RgbBuilder;
 pub use color::Color;
 pub use direction::Direction;
 pub use effect::Effect;
-use hex_literal::hex;
+use hidapi::HidError;
 use serde::{Deserialize, Serialize};
 pub use speed::Speed;
 
 use crate::{
-    into_report::{Bytes, Instruction, IntoReport, OneOrMany},
-    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820},
+    into_report::WriteInto,
+    keyboards::{
+        DynKeyboard, Keyboard, KeyboardKind,
+        ak35i::Ak35i,
+        ak820::Ak820,
+        f75_max::{F75CommunicationGuard, F75DataMessage, F75Max},
+    },
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -46,56 +49,40 @@ impl Rgb {
     }
 }
 
-impl IntoReport for Rgb {
-    fn report(&self, keyboard_kind: KeyboardKind) -> OneOrMany<Instruction> {
+impl WriteInto for Rgb {
+    fn write_into<K: DynKeyboard + ?Sized>(&self, keyboard: &mut K) -> Result<(), HidError> {
+        let kind = keyboard.keyboard_kind_dyn();
         let mut buf = [0u8; 65];
 
-        self.color.write_to_keyboard_format(keyboard_kind, &mut buf);
-        self.effect
-            .write_to_keyboard_format(keyboard_kind, &mut buf);
-        self.brightness
-            .write_to_keyboard_format(keyboard_kind, &mut buf);
-        self.speed.write_to_keyboard_format(keyboard_kind, &mut buf);
-        self.direction
-            .write_to_keyboard_format(keyboard_kind, &mut buf);
+        self.color.write_to_keyboard_format(kind, &mut buf);
+        self.effect.write_to_keyboard_format(kind, &mut buf);
+        self.brightness.write_to_keyboard_format(kind, &mut buf);
+        self.speed.write_to_keyboard_format(kind, &mut buf);
+        self.direction.write_to_keyboard_format(kind, &mut buf);
 
-        match keyboard_kind {
+        match kind {
             k if k == Ak820::keyboard_kind() => {
                 buf[0] = 0x04;
-
                 buf[1] = 0x2A;
                 buf[2] = 0x3D;
                 buf[3] = 0x06;
                 buf[4] = 0x1d;
 
-                OneOrMany::One(Instruction::Write(buf))
+                keyboard.write_dyn(&buf).map(|_| ())
             }
 
-            k if k == Ak35i::keyboard_kind() => {
-                const DELAY: Duration = Duration::from_millis(5);
+            // i'm not all too sure why, but this line of keyboards necessitates this weird
+            // 0x04 0x02 0x04 0x18 sequence. i assume it's some kind of handshake to tell the kb
+            // to start giving a gaf but :shrug:
+            k if k == Ak35i::keyboard_kind() || k == F75Max::keyboard_kind() => {
+                // buf[15] = 0xAA;
+                // buf[16] = 0x55;
 
-                buf[15] = 0xAA;
-                buf[16] = 0x55;
+                let mut guard = F75CommunicationGuard::new(keyboard)?;
+                guard.send(F75DataMessage::Rgb(self))?;
 
-                OneOrMany::Many(vec![
-                    Instruction::Write(hex!(
-                        "00 04 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
-                    )),
-                    Instruction::Delay(DELAY),
-                    Instruction::Read(Bytes::SixtyFive),
-                    Instruction::Delay(DELAY),
-                    Instruction::Write(hex!(
-                        "00 04 18 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
-                    )),
-                    Instruction::Delay(DELAY),
-                    Instruction::Read(Bytes::SixtyFive),
-                    Instruction::Delay(DELAY),
-                    Instruction::Write(hex!(
-                        "00 04 13 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
-                    )),
-                    Instruction::Delay(DELAY),
-                    Instruction::Write(buf),
-                ])
+                Ok(())
+                // F75Max::handshake(keyboard, &buf)
             }
 
             _ => {

@@ -13,7 +13,7 @@ pub enum Speed {
 }
 
 use crate::{
-    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820},
+    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820, f75_max::F75Max},
     reports::rgb::ToKeyboardFormat,
 };
 impl ToKeyboardFormat for Speed {
@@ -23,7 +23,7 @@ impl ToKeyboardFormat for Speed {
                 buf[11] = *self as u8;
             }
 
-            k if k == Ak35i::keyboard_kind() => {
+            k if k == Ak35i::keyboard_kind() || k == F75Max::keyboard_kind() => {
                 buf[11] = 4 - (*self as u8);
             }
 

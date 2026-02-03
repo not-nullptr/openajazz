@@ -1,60 +1,16 @@
-use std::time::Duration;
+use crate::keyboards::DynKeyboard;
+use hidapi::HidError;
 
-use crate::keyboards::KeyboardKind;
-
-#[derive(Debug, Clone)]
-pub enum OneOrMany<T> {
-    One(T),
-    Many(Vec<T>),
+pub trait WriteInto {
+    fn write_into<K: DynKeyboard + ?Sized>(&self, keyboard: &mut K) -> Result<(), HidError>;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Bytes {
-    SixtyFive,
+pub trait DynWriteInto {
+    fn write_into_dyn(&self, keyboard: &mut dyn DynKeyboard) -> Result<(), HidError>;
 }
 
-#[derive(Debug, Clone)]
-pub enum Instruction {
-    Read(Bytes),
-    Write([u8; 65]),
-    Delay(Duration),
-}
-
-impl Instruction {
-    pub fn execute<K: crate::keyboards::Keyboard>(
-        &self,
-        keyboard: &mut K,
-    ) -> Result<(), crate::hidapi::HidError> {
-        match self {
-            Instruction::Read(bytes) => {
-                match bytes {
-                    Bytes::SixtyFive => {
-                        let mut buf = [0u8; 65];
-                        keyboard.read(&mut buf)?;
-                    }
-                }
-                Ok(())
-            }
-
-            Instruction::Write(data) => {
-                keyboard.write(data)?;
-                Ok(())
-            }
-
-            Instruction::Delay(duration) => {
-                std::thread::sleep(*duration);
-                Ok(())
-            }
-        }
-    }
-}
-
-pub trait IntoReport {
-    fn report(&self, keyboard_kind: KeyboardKind) -> OneOrMany<Instruction>;
-}
-
-impl IntoReport for &dyn IntoReport {
-    fn report(&self, keyboard_kind: KeyboardKind) -> OneOrMany<Instruction> {
-        (**self).report(keyboard_kind)
+impl<W: WriteInto> DynWriteInto for W {
+    fn write_into_dyn(&self, keyboard: &mut dyn DynKeyboard) -> Result<(), hidapi::HidError> {
+        self.write_into(keyboard)
     }
 }

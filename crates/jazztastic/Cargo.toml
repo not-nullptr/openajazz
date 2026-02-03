@@ -4,12 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+color-eyre.workspace = true
+hex-literal.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+log.workspace = true
+chrono.workspace = true
+
 bitflags = "2.10.0"
-color-eyre = "0.6.5"
-hex-literal = "1.1.0"
 hidapi = "2.6.4"
-log = "0.4.29"
 pcap-parser = "0.17.0"
-serde = { version = "1.0.228", features = ["derive"] }
 strum = { version = "0.27.2", features = ["derive"] }
-thiserror = "2.0.18"

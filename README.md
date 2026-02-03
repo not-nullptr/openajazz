@@ -12,7 +12,12 @@ you can use task scheduler, systemctl or your event scheduler of choice to run a
 
 check [config.example.toml](config.example.toml). tl;dr there is a `keyboards` map, where the key is your keyboard's ID. you can find your keyboard's ID by running `openajazz` and then taking note of the ID logged by the program (it'll be a very long number). you can configure the colour, effect, speed, brightness and direction of the keyboard's RGB.
 
+## time sync
+
+openajazz implements time syncing for supported keyboards. it'll work in local timezone, and sync whenever it detects a supported keyboard being plugged in. support for this is experimental, please open an issue if you find any problems!
+
 ## support
 
-- AJAZZ AK820
-- AJAZZ AK35i (RGB only)
+- AJAZZ AK820 (RGB)
+- AJAZZ AK35i (RGB and time sync)
+- AULA F75 Max (RGB and time sync)

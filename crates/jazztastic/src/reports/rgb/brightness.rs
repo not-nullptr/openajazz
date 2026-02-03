@@ -13,14 +13,17 @@ pub enum Brightness {
 }
 
 use crate::{
-    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820},
+    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820, f75_max::F75Max},
     reports::rgb::ToKeyboardFormat,
 };
 
 impl ToKeyboardFormat for Brightness {
     fn write_to_keyboard_format(&self, keyboard_kind: KeyboardKind, buf: &mut [u8]) {
         match keyboard_kind {
-            k if k == Ak820::keyboard_kind() || k == Ak35i::keyboard_kind() => {
+            k if k == Ak820::keyboard_kind()
+                || k == Ak35i::keyboard_kind()
+                || k == F75Max::keyboard_kind() =>
+            {
                 buf[10] = *self as u8;
             }
 

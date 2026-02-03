@@ -1,4 +1,4 @@
-use crate::keyboards::Keyboard;
+use crate::keyboards::{Keyboard, KeyboardFeatures};
 use hidapi::{HidDevice, HidError};
 
 #[derive(Debug)]
@@ -10,6 +10,8 @@ impl Keyboard for Ak35i {
     const VENDOR_ID: u16 = 0x0c45;
     const PRODUCT_ID: u16 = 0x8009;
     const USAGE_PAGE: u16 = 0xff13;
+
+    const FEATURES: KeyboardFeatures = KeyboardFeatures::RGB.union(KeyboardFeatures::TIME_SYNC);
 
     const MANUFACTURER: &str = "AJAZZ";
     const NAME: &str = "AK35I";

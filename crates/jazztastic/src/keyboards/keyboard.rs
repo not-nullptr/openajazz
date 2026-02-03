@@ -1,7 +1,4 @@
-use crate::{
-    error::DetectError,
-    into_report::{IntoReport, OneOrMany},
-};
+use crate::{error::DetectError, into_report::DynWriteInto, keyboards::KeyboardFeatures};
 use hidapi::{HidApi, HidDevice, HidError};
 use std::any::TypeId;
 
@@ -14,13 +11,16 @@ pub trait Keyboard: Sized + 'static {
     const PRODUCT_ID: u16;
     const USAGE_PAGE: u16;
 
+    // features
+    const FEATURES: KeyboardFeatures;
+
     const MANUFACTURER: &str;
     const NAME: &str;
 
     fn new(device: HidDevice) -> Self;
     fn device(&self) -> &HidDevice;
 
-    fn detect(api: &HidApi) -> Result<Self, DetectError> {
+    fn discover(api: &HidApi) -> Result<Self, DetectError> {
         let device_info = api
             .device_list()
             .find(|d| {
@@ -34,22 +34,8 @@ pub trait Keyboard: Sized + 'static {
         Ok(Self::new(device))
     }
 
-    fn send<R: IntoReport>(&mut self, message: &R) -> Result<(), HidError> {
-        let buf = message.report(Self::keyboard_kind());
-
-        log::debug!("sending report to {}: {:?}", Self::NAME, buf);
-
-        match buf {
-            OneOrMany::One(instruction) => instruction.execute(self),
-
-            OneOrMany::Many(instructions) => {
-                for instruction in instructions {
-                    instruction.execute(self)?;
-                }
-
-                Ok(())
-            }
-        }
+    fn send<R: DynWriteInto + ?Sized>(&mut self, message: &R) -> Result<(), HidError> {
+        message.write_into_dyn(self)
     }
 
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, HidError> {
@@ -83,12 +69,18 @@ pub trait DynKeyboard {
     //     Ok(())
     // }
 
-    fn send_dyn(&mut self, message: &dyn IntoReport) -> Result<(), HidError>;
+    fn send_dyn(&mut self, message: &dyn DynWriteInto) -> Result<(), HidError>;
 
-    fn name_dyn(&self) -> &'static str;
-    fn manufacturer_dyn(&self) -> &'static str;
+    fn name(&self) -> &'static str;
+    fn manufacturer(&self) -> &'static str;
 
     fn keyboard_kind_dyn(&self) -> KeyboardKind;
+
+    fn write_dyn(&mut self, buf: &[u8]) -> Result<usize, HidError>;
+
+    fn read_dyn(&mut self, buf: &mut [u8]) -> Result<usize, HidError>;
+
+    fn features(&self) -> KeyboardFeatures;
 }
 
 impl<K: Keyboard> DynKeyboard for K {
@@ -96,19 +88,31 @@ impl<K: Keyboard> DynKeyboard for K {
         self.device()
     }
 
-    fn send_dyn(&mut self, message: &dyn IntoReport) -> Result<(), HidError> {
-        K::send(self, &message)
+    fn send_dyn(&mut self, message: &dyn DynWriteInto) -> Result<(), HidError> {
+        K::send(self, message)
     }
 
-    fn name_dyn(&self) -> &'static str {
+    fn name(&self) -> &'static str {
         K::NAME
     }
 
-    fn manufacturer_dyn(&self) -> &'static str {
+    fn manufacturer(&self) -> &'static str {
         K::MANUFACTURER
     }
 
     fn keyboard_kind_dyn(&self) -> KeyboardKind {
         K::keyboard_kind()
+    }
+
+    fn read_dyn(&mut self, buf: &mut [u8]) -> Result<usize, HidError> {
+        K::read(self, buf)
+    }
+
+    fn write_dyn(&mut self, buf: &[u8]) -> Result<usize, HidError> {
+        K::write(self, buf)
+    }
+
+    fn features(&self) -> KeyboardFeatures {
+        K::FEATURES
     }
 }

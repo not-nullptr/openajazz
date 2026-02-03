@@ -1,4 +1,7 @@
-use crate::{keyboards::Keyboard, reports::rgb::Rgb};
+use crate::{
+    keyboards::{Keyboard, KeyboardFeatures},
+    reports::rgb::Rgb,
+};
 use hidapi::{HidDevice, HidError};
 
 #[derive(Debug)]
@@ -10,6 +13,8 @@ impl Keyboard for Ak820 {
     const VENDOR_ID: u16 = 0x320F;
     const PRODUCT_ID: u16 = 0x505B;
     const USAGE_PAGE: u16 = 0xFF1C;
+
+    const FEATURES: KeyboardFeatures = KeyboardFeatures::RGB;
 
     const MANUFACTURER: &str = "AJAZZ";
     const NAME: &str = "AK820";
