@@ -19,7 +19,7 @@ pub use speed::Speed;
 
 use crate::{
     into_report::{Bytes, Instruction, IntoReport, OneOrMany},
-    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820},
+    keyboards::{Keyboard, KeyboardKind, ak35i::Ak35i, ak820::Ak820, f75_max::F75Max},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -71,7 +71,7 @@ impl IntoReport for Rgb {
                 OneOrMany::One(Instruction::Write(buf))
             }
 
-            k if k == Ak35i::keyboard_kind() => {
+            k if k == Ak35i::keyboard_kind() || k == F75Max::keyboard_kind() => {
                 const DELAY: Duration = Duration::from_millis(5);
 
                 buf[15] = 0xAA;
