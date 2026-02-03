@@ -4,12 +4,15 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+color-eyre.workspace = true
+hex-literal.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+log.workspace = true
+chrono.workspace = true
+
 jazztastic = { path = "../jazztastic" }
-color-eyre = "0.6.5"
 env_logger = "0.11.8"
-log = "0.4.29"
 notify = "8.2.0"
 notify-debouncer-full = "0.7.0"
-serde = { version = "1.0.228", features = ["derive"] }
-thiserror = "2.0.18"
 toml = "0.9.11"
