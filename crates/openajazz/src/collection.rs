@@ -48,6 +48,7 @@ impl KeyboardTask {
     }
 
     pub fn run(&mut self) -> color_eyre::Result<()> {
+        std::thread::sleep(Duration::from_secs(self.config.hacks.delay_secs));
         while let Ok(reload_config) = self.interruptor.recv() {
             if reload_config {
                 let new_config =

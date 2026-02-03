@@ -5,9 +5,14 @@ use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    #[serde(default)]
     pub keyboards: HashMap<KeyboardId, Rgb>,
+
     #[serde(default)]
     pub debug: DebugConfig,
+
+    #[serde(default)]
+    pub hacks: HacksConfig,
 }
 
 #[derive(Debug, Deserialize)]
@@ -30,4 +35,10 @@ impl Default for DebugConfig {
 
 pub fn default_log_level() -> String {
     "openajazz=debug,jazztastic=debug".to_string()
+}
+
+#[derive(Debug, Deserialize, Default)]
+pub struct HacksConfig {
+    #[serde(default)]
+    pub delay_secs: u64,
 }
